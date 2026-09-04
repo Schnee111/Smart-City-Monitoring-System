@@ -1,20 +1,29 @@
 'use client';
 
-import { Fragment, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ReactNode } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   description?: string;
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  showCloseButton?: boolean;
 }
 
-export function Modal({ isOpen, onClose, title, description, children, size = 'md' }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  description,
+  children,
+  size = 'md',
+  showCloseButton = true,
+}: ModalProps) {
   const sizes = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -23,58 +32,45 @@ export function Modal({ isOpen, onClose, title, description, children, size = 'm
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <Fragment>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-          />
-          
-          {/* Modal */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className={cn(
-                'w-full bg-slate-900 border border-slate-700 rounded-xl shadow-2xl',
-                sizes[size]
-              )}
-            >
-              {/* Header */}
-              {(title || description) && (
-                <div className="flex items-start justify-between p-5 border-b border-slate-700">
-                  <div>
-                    {title && (
-                      <h2 className="text-lg font-semibold text-white">{title}</h2>
-                    )}
-                    {description && (
-                      <p className="mt-1 text-sm text-slate-400">{description}</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="p-1 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-800"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <Dialog.Content
+            className={cn(
+              'w-full glass-card-dark rounded-2xl shadow-glass border border-white/10',
+              'animate-scale-in focus:outline-none',
+              sizes[size]
+            )}
+          >
+            {(title || showCloseButton) && (
+              <div className="flex items-start justify-between p-4 border-b border-white/8">
+                <div>
+                  {title && (
+                    <Dialog.Title className="text-base font-semibold text-white tracking-tight">
+                      {title}
+                    </Dialog.Title>
+                  )}
+                  {description && (
+                    <Dialog.Description className="text-xs text-aeter-ink-mute mt-0.5">
+                      {description}
+                    </Dialog.Description>
+                  )}
                 </div>
-              )}
-              
-              {/* Content */}
-              <div className="p-5">
-                {children}
+                {showCloseButton && (
+                  <Dialog.Close
+                    className="p-1 text-aeter-ink-mute hover:text-white transition-colors rounded-lg hover:bg-white/10"
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </Dialog.Close>
+                )}
               </div>
-            </motion.div>
-          </div>
-        </Fragment>
-      )}
-    </AnimatePresence>
+            )}
+            <div className="p-4">{children}</div>
+          </Dialog.Content>
+        </div>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
