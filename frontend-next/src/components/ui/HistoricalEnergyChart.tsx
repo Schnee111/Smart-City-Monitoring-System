@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
-import { ChevronLeft, ChevronRight, Activity, Calendar, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Activity, Calendar, RefreshCw, Radio, Zap } from 'lucide-react';
 import {
   AreaChart,
   Area,
@@ -12,54 +12,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/locale/id';
 import { fetcher } from '@/src/lib/fetcher';
-
-// MUI Dark Theme for DatePicker
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#10b981', // emerald-500
-    },
-    background: {
-      paper: '#1e293b', // slate-800
-      default: '#0f172a', // slate-900
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: '#94a3b8', // slate-400
-    },
-  },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backgroundColor: '#1e293b',
-          border: '1px solid #334155',
-        },
-      },
-    },
-    MuiInputBase: {
-      styleOverrides: {
-        root: {
-          '&:before': {
-            borderBottom: '1px solid #475569',
-          },
-          '&:hover:not(.Mui-disabled):before': {
-            borderBottom: '2px solid #64748b',
-          },
-        },
-      },
-    },
-  },
-});
 
 interface Sensor {
   sensorId: string;
@@ -90,6 +43,7 @@ interface ChartDataPoint {
 }
 
 type ViewMode = 'live' | 'history';
+type RangePreset = '1D' | '7D' | '30D' | 'LIVE';
 
 interface HistoricalEnergyChartProps {
   showModeToggle?: boolean;
@@ -101,12 +55,11 @@ export default function HistoricalEnergyChart({
   height = 280 
 }: HistoricalEnergyChartProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('live');
+  const [rangePreset, setRangePreset] = useState<RangePreset>('LIVE');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [realtimeHistory, setRealtimeHistory] = useState<ChartDataPoint[]>([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-  // Format date for API
+  // Format date for API (YYYY-MM-DD)
   const dateStr = selectedDate.toISOString().split('T')[0];
   const isToday = dateStr === new Date().toISOString().split('T')[0];
 
@@ -124,15 +77,16 @@ export default function HistoricalEnergyChart({
     { refreshInterval: 3000 }
   );
 
-  // Build real-time history when sensors data changes
+  // Build real-time telemetry history when sensors stream changes
   useEffect(() => {
     if (viewMode !== 'live' || sensors.length === 0) return;
 
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('id-ID', {
+    const timeStr = now.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      hour12: false,
     });
 
     let totalKwh = 0;
@@ -159,29 +113,42 @@ export default function HistoricalEnergyChart({
         gridKwh: Math.round(gridKwh * 100) / 100,
       };
 
-      // Avoid duplicates within same second
       if (prev.length > 0) {
         const lastTime = prev[prev.length - 1].time;
         if (lastTime === timeStr) return prev;
       }
 
       const updated = [...prev, newPoint];
-      return updated.slice(-60); // Keep last 60 data points
+      return updated.slice(-60); // Retain last 60 telemetry points
     });
   }, [sensors, viewMode]);
 
-  // Reset date when switching to history mode
-  useEffect(() => {
-    if (viewMode === 'history') {
-      setSelectedDate(new Date());
+  // Sync mode with range presets
+  const handleRangeSelect = (preset: RangePreset) => {
+    setRangePreset(preset);
+    if (preset === 'LIVE') {
+      setViewMode('live');
+    } else {
+      setViewMode('history');
+      if (preset === '1D') {
+        setSelectedDate(new Date());
+      } else if (preset === '7D') {
+        const d = new Date();
+        d.setDate(d.getDate() - 6);
+        setSelectedDate(d);
+      } else if (preset === '30D') {
+        const d = new Date();
+        d.setDate(d.getDate() - 29);
+        setSelectedDate(d);
+      }
     }
-  }, [viewMode]);
+  };
 
-  // Navigate dates (for history mode only)
   const goToPreviousDay = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() - 1);
     setSelectedDate(newDate);
+    setRangePreset('1D');
   };
 
   const goToNextDay = () => {
@@ -190,21 +157,11 @@ export default function HistoricalEnergyChart({
     const today = new Date();
     if (newDate <= today) {
       setSelectedDate(newDate);
+      setRangePreset('1D');
     }
   };
 
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
-  const handleDateChange = (newValue: Dayjs | null) => {
-    if (newValue) {
-      setSelectedDate(newValue.toDate());
-      setShowDatePicker(false);
-    }
-  };
-
-  // Current stats
+  // Current stats calculation
   const currentStats = useMemo(() => {
     if (viewMode === 'history' && hourlyData && hourlyData.length > 0) {
       const totalKwh = hourlyData.reduce((acc, h) => acc + h.totalKwh, 0);
@@ -235,10 +192,9 @@ export default function HistoricalEnergyChart({
     return { totalKwh, solarKwh, gridKwh, hoursWithData: activeCount };
   }, [sensors, viewMode, hourlyData]);
 
-  // Chart data based on mode
+  // Chart data calculation
   const chartData = useMemo(() => {
     if (viewMode === 'history' && hourlyData && hourlyData.length > 0) {
-      // Show all hours up to current hour for today, or all hours with data for history
       const currentHour = new Date().getHours();
       return hourlyData
         .filter(h => {
@@ -258,17 +214,6 @@ export default function HistoricalEnergyChart({
     return realtimeHistory;
   }, [viewMode, hourlyData, realtimeHistory, isToday]);
 
-  // Format date for display
-  const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('id-ID', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
-  // Format large numbers
   const formatKwh = (value: number) => {
     if (value >= 1000) {
       return `${(value / 1000).toFixed(1)}k`;
@@ -277,311 +222,267 @@ export default function HistoricalEnergyChart({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Mode Toggle + Date Selector Row */}
-      {showModeToggle && (
-        <div className="flex items-center justify-between">
-          {/* Mode Toggle */}
-          <div className="flex items-center bg-slate-800 rounded-lg p-1">
+    <div className="space-y-4 font-mono">
+      {/* SCADA Range & Date Navigation Filter Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-void/70 border border-void-border p-2.5 rounded-lg">
+        {/* Range Buttons (1D, 7D, 30D, LIVE) */}
+        <div className="flex items-center gap-1 bg-void-panel p-1 rounded-md border border-void-border">
+          {(['LIVE', '1D', '7D', '30D'] as RangePreset[]).map((preset) => (
             <button
-              onClick={() => setViewMode('live')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all ${
-                viewMode === 'live' 
-                  ? 'bg-emerald-500/20 text-emerald-400' 
-                  : 'text-slate-400 hover:text-white'
+              key={preset}
+              onClick={() => handleRangeSelect(preset)}
+              className={`px-3 py-1 rounded text-xs tracking-wider transition-all font-semibold ${
+                rangePreset === preset
+                  ? 'bg-scada-cyan/20 text-scada-cyan border border-scada-cyan/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                  : 'text-slate-400 hover:text-white hover:bg-void-surface'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live
+              {preset === 'LIVE' ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-scada-cyan animate-pulse"></span>
+                  LIVE
+                </span>
+              ) : (
+                preset
+              )}
             </button>
+          ))}
+        </div>
+
+        {/* Clean native Dark Date Picker controls for History mode */}
+        {viewMode === 'history' && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setViewMode('history')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all ${
-                viewMode === 'history' 
-                  ? 'bg-emerald-500/20 text-emerald-400' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              onClick={goToPreviousDay}
+              className="p-1.5 rounded bg-void-panel hover:bg-void-surface border border-void-border text-slate-400 hover:text-white transition-colors"
+              title="Previous Day"
             >
-              Historis
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            
+            <div className="relative flex items-center">
+              <input
+                type="date"
+                value={dateStr}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSelectedDate(new Date(e.target.value));
+                    setRangePreset('1D');
+                  }
+                }}
+                className="bg-void-panel border border-void-border text-xs text-scada-cyan px-2.5 py-1.5 rounded focus:outline-none focus:border-scada-cyan/50 tracking-wider font-mono cursor-pointer"
+              />
+            </div>
+
+            <button
+              onClick={goToNextDay}
+              disabled={isToday}
+              className={`p-1.5 rounded border transition-colors ${
+                isToday 
+                  ? 'bg-void/40 border-void-border/50 text-slate-600 cursor-not-allowed' 
+                  : 'bg-void-panel hover:bg-void-surface border-void-border text-slate-400 hover:text-white'
+              }`}
+              title="Next Day"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => refetchHourly()}
+              className="p-1.5 rounded bg-void-panel hover:bg-void-surface border border-void-border text-slate-400 hover:text-scada-cyan transition-colors"
+              title="Refresh Stream"
+            >
+              <RefreshCw className="w-4 h-4" />
             </button>
           </div>
+        )}
+      </div>
 
-          {/* Date Selector (only for history mode) */}
-          {viewMode === 'history' ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPreviousDay}
-                className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <div className="relative">
-                <button
-                  ref={(el) => {
-                    if (el && !anchorEl) setAnchorEl(el);
-                  }}
-                  onClick={() => setShowDatePicker(!showDatePicker)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-700/30 hover:bg-slate-700/50 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm text-white">
-                    {isToday ? 'Hari Ini' : formatDisplayDate(selectedDate)}
-                  </span>
-                </button>
-                <ThemeProvider theme={darkTheme}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="id">
-                    <DatePicker
-                      value={dayjs(selectedDate)}
-                      onChange={handleDateChange}
-                      maxDate={dayjs()}
-                      open={showDatePicker}
-                      onClose={() => setShowDatePicker(false)}
-                      format="DD/MM/YYYY"
-                      slotProps={{
-                        textField: {
-                          sx: { display: 'none' },
-                        },
-                        popper: {
-                          anchorEl: anchorEl,
-                          placement: 'bottom-end',
-                          sx: {
-                            '& .MuiPaper-root': {
-                              backgroundColor: '#1e293b',
-                              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                              border: '1px solid #334155',
-                              borderRadius: '12px',
-                              marginTop: '8px',
-                            },
-                            '& .MuiPickersDay-root': {
-                              color: '#ffffff',
-                              '&:hover': {
-                                backgroundColor: '#334155',
-                              },
-                              '&.Mui-selected': {
-                                backgroundColor: '#10b981 !important',
-                                '&:hover': {
-                                  backgroundColor: '#059669 !important',
-                                },
-                              },
-                            },
-                            '& .MuiPickersCalendarHeader-root': {
-                              color: '#ffffff',
-                            },
-                            '& .MuiDayCalendar-weekDayLabel': {
-                              color: '#94a3b8',
-                            },
-                            '& .MuiPickersYear-yearButton': {
-                              color: '#ffffff',
-                              '&:hover': {
-                                backgroundColor: '#334155',
-                              },
-                              '&.Mui-selected': {
-                                backgroundColor: '#10b981 !important',
-                                '&:hover': {
-                                  backgroundColor: '#059669 !important',
-                                },
-                              },
-                            },
-                            '& .MuiIconButton-root': {
-                              color: '#94a3b8',
-                              '&:hover': {
-                                backgroundColor: '#334155',
-                              },
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </ThemeProvider>
-              </div>
-              <button
-                onClick={goToNextDay}
-                disabled={isToday}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  isToday 
-                    ? 'bg-slate-800/30 text-slate-600 cursor-not-allowed' 
-                    : 'bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white'
-                }`}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => refetchHourly()}
-                className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-                title="Refresh data"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      {/* Stats Row */}
+      {/* High-density Telemetry Metrics Row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-slate-700/30 rounded-lg p-3">
-          <p className="text-xs text-slate-400">{viewMode === 'live' ? 'Total Saat Ini' : 'Total'}</p>
-          <p className="text-lg font-bold text-white">
+        <div className="bg-void-panel/90 border border-void-border rounded-lg p-3 relative overflow-hidden">
+          <div className="absolute top-0 right-0 left-0 h-0.5 bg-scada-cyan/40"></div>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider">TOTAL LOAD</p>
+            <span className="w-1.5 h-1.5 rounded-full bg-scada-cyan"></span>
+          </div>
+          <p className="text-lg lg:text-xl font-bold text-white mt-1">
             {formatKwh(currentStats.totalKwh)} <span className="text-xs font-normal text-slate-400">kWh</span>
           </p>
         </div>
-        <div className="bg-slate-700/30 rounded-lg p-3">
-          <p className="text-xs text-slate-400">Solar</p>
-          <p className="text-lg font-bold text-amber-400">
+
+        <div className="bg-void-panel/90 border border-void-border rounded-lg p-3 relative overflow-hidden">
+          <div className="absolute top-0 right-0 left-0 h-0.5 bg-scada-amber/40"></div>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-scada-amber uppercase tracking-wider">SOLAR GEN</p>
+            <span className="w-1.5 h-1.5 rounded-full bg-scada-amber"></span>
+          </div>
+          <p className="text-lg lg:text-xl font-bold text-scada-amber mt-1">
             {formatKwh(currentStats.solarKwh)} <span className="text-xs font-normal text-slate-400">kWh</span>
           </p>
         </div>
-        <div className="bg-slate-700/30 rounded-lg p-3">
-          <p className="text-xs text-slate-400">Grid</p>
-          <p className="text-lg font-bold text-indigo-400">
+
+        <div className="bg-void-panel/90 border border-void-border rounded-lg p-3 relative overflow-hidden">
+          <div className="absolute top-0 right-0 left-0 h-0.5 bg-scada-cobalt/40"></div>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-scada-cobalt uppercase tracking-wider">GRID DRAW</p>
+            <span className="w-1.5 h-1.5 rounded-full bg-scada-cobalt"></span>
+          </div>
+          <p className="text-lg lg:text-xl font-bold text-scada-cobalt mt-1">
             {formatKwh(currentStats.gridKwh)} <span className="text-xs font-normal text-slate-400">kWh</span>
           </p>
         </div>
       </div>
 
-      {/* Info Row */}
-      <div className="flex items-center justify-between text-xs">
+      {/* Telemetry Stream Status & Legend */}
+      <div className="flex items-center justify-between text-xs border-b border-void-border pb-2">
         <div className="flex items-center gap-2 text-slate-400">
-          <Activity className="w-3.5 h-3.5 text-emerald-400" />
-          <span>
-            {viewMode === 'live' 
-              ? `Data real-time` 
-              : `Data per jam • ${currentStats.hoursWithData} jam`
-            }
+          <Activity className="w-3.5 h-3.5 text-scada-cyan animate-pulse" />
+          <span className="text-[11px] uppercase tracking-wider">
+            {viewMode === 'live' ? 'BUFFER: 60 SECONDS TELEMETRY' : `HOURLY SAMPLES (${currentStats.hoursWithData} ACTIVE)`}
           </span>
         </div>
         
-        {/* Legend */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 text-[11px]">
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-            <span className="text-slate-400">Total</span>
+            <div className="w-2 h-2 rounded-full bg-scada-cyan shadow-[0_0_6px_#06B6D4]"></div>
+            <span className="text-slate-300">Total</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-            <span className="text-slate-400">Solar</span>
+            <div className="w-2 h-2 rounded-full bg-scada-amber shadow-[0_0_6px_#F59E0B]"></div>
+            <span className="text-slate-300">Solar</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
-            <span className="text-slate-400">Grid</span>
+            <div className="w-2 h-2 rounded-full bg-scada-cobalt shadow-[0_0_6px_#3B82F6]"></div>
+            <span className="text-slate-300">Grid</span>
           </div>
         </div>
       </div>
 
-      {/* Chart */}
-      <div style={{ height }}>
+      {/* Cyber Telemetry Recharts Area */}
+      <div style={{ height }} className="relative">
         {hourlyLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+          <div className="flex items-center justify-center h-full bg-void-panel/40 rounded-lg border border-void-border">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-scada-cyan border-t-transparent"></div>
           </div>
         ) : chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorSolar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorGrid" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis 
-                  dataKey="time" 
-                  stroke="#475569"
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  axisLine={{ stroke: '#334155' }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  stroke="#475569"
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  axisLine={{ stroke: '#334155' }}
-                  tickFormatter={(value) => `${value}`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0f172a',
-                    border: '1px solid #334155',
-                    borderRadius: '12px',
-                    color: '#fff',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-                  }}
-                  labelStyle={{ color: '#94a3b8' }}
-                  formatter={(value: number, name: string) => {
-                    const labels: Record<string, string> = {
-                      totalKwh: 'Total',
-                      solarKwh: 'Solar',
-                      gridKwh: 'Grid'
-                    };
-                    return [`${value.toFixed(2)} kWh`, labels[name] || name];
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="totalKwh"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorTotal)"
-                  name="totalKwh"
-                  dot={false}
-                  activeDot={{ r: 4, fill: '#10b981' }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="solarKwh"
-                  stroke="#f59e0b"
-                  strokeWidth={1.5}
-                  fillOpacity={1}
-                  fill="url(#colorSolar)"
-                  name="solarKwh"
-                  dot={false}
-                  activeDot={{ r: 3, fill: '#f59e0b' }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="gridKwh"
-                  stroke="#6366f1"
-                  strokeWidth={1.5}
-                  fillOpacity={1}
-                  fill="url(#colorGrid)"
-                  name="gridKwh"
-                  dot={false}
-                  activeDot={{ r: 3, fill: '#6366f1' }}
-                />
-              </AreaChart>
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+            >
+              <defs>
+                {/* Total Cyan Telemetry Gradient */}
+                <linearGradient id="scadaColorTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
+                </linearGradient>
+                {/* Solar Amber Gradient */}
+                <linearGradient id="scadaColorSolar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.30} />
+                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
+                </linearGradient>
+                {/* Grid Cobalt Gradient */}
+                <linearGradient id="scadaColorGrid" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid strokeDasharray="2 2" stroke="#1A253C" vertical={false} />
+              
+              <XAxis 
+                dataKey="time" 
+                stroke="#64748B"
+                tick={{ fill: '#94A3B8', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
+                axisLine={{ stroke: '#1A253C' }}
+                interval="preserveStartEnd"
+              />
+              <YAxis 
+                stroke="#64748B"
+                tick={{ fill: '#94A3B8', fontSize: 10, fontFamily: 'ui-monospace, monospace' }}
+                axisLine={{ stroke: '#1A253C' }}
+                tickFormatter={(value) => `${value}`}
+              />
+              
+              {/* Cyber SCADA Telemetry Tooltip */}
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-void-panel/95 border border-scada-cyan/40 rounded-lg p-3 font-mono text-xs shadow-2xl backdrop-blur-md min-w-[140px]">
+                        <div className="text-[10px] text-scada-cyan font-bold tracking-wider mb-2 border-b border-void-border pb-1">
+                          TIMESTAMP: {label}
+                        </div>
+                        {payload.map((entry, index) => {
+                          const isTotal = entry.dataKey === 'totalKwh';
+                          const isSolar = entry.dataKey === 'solarKwh';
+                          const color = isTotal ? '#06B6D4' : isSolar ? '#F59E0B' : '#3B82F6';
+                          const labelName = isTotal ? 'TOTAL' : isSolar ? 'SOLAR' : 'GRID';
+                          return (
+                            <div key={`tooltip-${index}`} className="flex items-center justify-between gap-3 my-0.5">
+                              <span className="flex items-center gap-1.5 text-slate-400">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }}></span>
+                                {labelName}:
+                              </span>
+                              <span className="font-bold text-white">
+                                {Number(entry.value).toFixed(2)} <span className="text-[10px] text-slate-400 font-normal">kWh</span>
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              
+              <Area
+                type="monotone"
+                dataKey="totalKwh"
+                stroke="#06B6D4"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#scadaColorTotal)"
+                name="totalKwh"
+                dot={false}
+                activeDot={{ r: 4, fill: '#06B6D4', stroke: '#FFFFFF', strokeWidth: 1.5 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="solarKwh"
+                stroke="#F59E0B"
+                strokeWidth={1.5}
+                fillOpacity={1}
+                fill="url(#scadaColorSolar)"
+                name="solarKwh"
+                dot={false}
+                activeDot={{ r: 3.5, fill: '#F59E0B' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="gridKwh"
+                stroke="#3B82F6"
+                strokeWidth={1.5}
+                fillOpacity={1}
+                fill="url(#scadaColorGrid)"
+                name="gridKwh"
+                dot={false}
+                activeDot={{ r: 3.5, fill: '#3B82F6' }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400">
-            <Activity className="w-10 h-10 mb-3 opacity-40" />
-            <p className="text-sm">
-              {viewMode === 'live' ? 'Mengumpulkan data...' : 'Tidak ada data untuk tanggal ini'}
-            </p>
-            <p className="text-xs text-slate-500">
-              {viewMode === 'live' ? 'Grafik akan muncul setelah beberapa detik' : 'Coba pilih tanggal lain'}
+          <div className="flex flex-col items-center justify-center h-full bg-void-panel/30 border border-void-border rounded-lg text-slate-400">
+            <Activity className="w-8 h-8 mb-2 text-scada-cyan/40 animate-pulse" />
+            <p className="text-xs uppercase tracking-wider">
+              {viewMode === 'live' ? 'INGESTING TELEMETRY PACKETS...' : 'NO TELEMETRY RECORD FOR GIVEN INTERVAL'}
             </p>
           </div>
         )}
       </div>
-
-      {/* Footer info */}
-      <p className="text-xs text-slate-500 text-center">
-        {viewMode === 'live' 
-          ? 'Data historis untuk Hari Ini' 
-          : `Data historis untuk ${isToday ? 'Hari Ini' : formatDisplayDate(selectedDate)}`
-        }
-      </p>
     </div>
   );
 }

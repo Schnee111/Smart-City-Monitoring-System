@@ -3,60 +3,105 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 2, 6, 23;
-  --background-end-rgb: 15, 23, 42;
+  --foreground-rgb: 226, 232, 240;
+  --background-start-rgb: 7, 10, 17;
+  --background-end-rgb: 13, 19, 34;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
+  background: #070A11;
   min-height: 100vh;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.05) 0%, transparent 50%),
+    linear-gradient(to right, rgba(26, 37, 60, 0.28) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 37, 60, 0.28) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
 }
 
-/* Modern glassmorphism utilities */
+/* SCADA Command Deck Glass Panels */
 .glass {
-  @apply bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl;
+  background: rgba(13, 19, 34, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(26, 37, 60, 0.95);
+  border-radius: 0.75rem;
 }
 
 .glass-dark {
-  @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl;
+  background: rgba(7, 10, 17, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(26, 37, 60, 0.95);
+  border-radius: 0.75rem;
 }
 
-/* Custom scrollbar - thin and elegant */
+.scada-panel {
+  background: rgba(13, 19, 34, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #1A253C;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+.scada-panel-glow {
+  background: rgba(13, 19, 34, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 16px -2px rgba(6, 182, 212, 0.15), inset 0 1px 0 0 rgba(6, 182, 212, 0.2);
+}
+
+.scada-hud-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border: 1px solid rgba(26, 37, 60, 0.8);
+  background: rgba(7, 10, 17, 0.6);
+}
+
+/* Custom scrollbar - SCADA Terminal style */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: #070A11;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-600/50 rounded-full;
+  background: #1A253C;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-500/70;
+  background: #06B6D4;
 }
 
-/* Custom scrollbar for specific elements */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-600/30 rounded-full;
+  background: #1A253C;
+  border-radius: 2px;
 }
 
-/* Leaflet overrides for dark mode */
+/* Leaflet overrides for dark SCADA mode */
 .leaflet-container {
-  background: #0f172a !important;
+  background: #070A11 !important;
   font-family: inherit;
 }
 
@@ -79,7 +124,6 @@ body {
   display: none !important;
 }
 
-/* Tooltip styles for minimal sensor markers */
 .leaflet-tooltip {
   background: transparent !important;
   border: none !important;
@@ -97,29 +141,62 @@ body {
   box-shadow: none !important;
 }
 
-/* Remove default leaflet controls styling */
 .leaflet-control-zoom {
   display: none !important;
 }
 
 .leaflet-control-attribution {
-  @apply bg-slate-900/80 text-slate-500 text-xs px-2 py-1 rounded-tl-lg;
-  border: none !important;
+  background: rgba(7, 10, 17, 0.85) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  font-family: ui-monospace, monospace;
+  padding: 2px 8px !important;
+  border-top-left-radius: 6px;
+  border: 1px solid #1A253C !important;
+  border-right: none !important;
+  border-bottom: none !important;
 }
 
 .leaflet-control-attribution a {
-  @apply text-slate-400 hover:text-white;
+  color: #06b6d4 !important;
 }
 
-/* Pulse animation for markers */
+/* SCADA Radar Pulse Markers */
+@keyframes scada-pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  60% {
+    transform: scale(2.2);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(3.0);
+    opacity: 0;
+  }
+}
+
+.scada-radar-pulse {
+  animation: scada-pulse-ring 2.4s cubic-bezier(0.1, 0.4, 0.2, 1) infinite;
+}
+
+.scada-radar-pulse-amber {
+  animation: scada-pulse-ring 2s cubic-bezier(0.1, 0.4, 0.2, 1) infinite;
+}
+
+.scada-radar-pulse-rose {
+  animation: scada-pulse-ring 1.5s cubic-bezier(0.1, 0.4, 0.2, 1) infinite;
+}
+
 @keyframes marker-pulse {
   0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.3);
-    opacity: 0.6;
+    transform: scale(1.2);
+    opacity: 0.7;
   }
 }
 
@@ -127,37 +204,9 @@ body {
   animation: marker-pulse 2s ease-in-out infinite;
 }
 
-/* Sensor pulse animation */
-@keyframes sensor-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-/* Number counter animation */
-@keyframes count-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.count-up {
-  animation: count-up 0.5s ease-out;
-}
-
 /* Focus ring styles */
 @layer utilities {
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-slate-900;
+    @apply focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:ring-offset-2 focus:ring-offset-slate-950;
   }
 }
