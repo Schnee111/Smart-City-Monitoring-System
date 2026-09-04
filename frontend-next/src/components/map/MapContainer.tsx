@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { MapContainer as LeafletMap, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import useSWR from 'swr';
-import { RefreshCw, Maximize2, Minus, Plus, Radio, Layers } from 'lucide-react';
+import { RefreshCw, Maximize2, Minus, Plus } from 'lucide-react';
 import { fetcher } from '@/src/lib/fetcher';
 import { useDashboardStore } from '@/src/lib/store';
 import { Sensor } from '@/src/types';
@@ -73,7 +73,7 @@ function MapController() {
   return null;
 }
 
-// Custom SCADA HUD controls
+// Clean Minimalist Map controls
 function CustomControls() {
   const map = useMap();
 
@@ -81,22 +81,22 @@ function CustomControls() {
     <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5">
       <button
         onClick={() => map.zoomIn()}
-        className="w-8 h-8 bg-void-panel/90 hover:bg-void-surface border border-void-border hover:border-scada-cyan/50 rounded-lg flex items-center justify-center text-slate-300 hover:text-scada-cyan transition-colors shadow-lg"
+        className="w-8 h-8 glass-card-dark hover:bg-white/10 flex items-center justify-center text-aeter-ink-soft hover:text-white transition-colors shadow-glass rounded-xl"
         title="Zoom In"
       >
         <Plus className="w-3.5 h-3.5" />
       </button>
       <button
         onClick={() => map.zoomOut()}
-        className="w-8 h-8 bg-void-panel/90 hover:bg-void-surface border border-void-border hover:border-scada-cyan/50 rounded-lg flex items-center justify-center text-slate-300 hover:text-scada-cyan transition-colors shadow-lg"
+        className="w-8 h-8 glass-card-dark hover:bg-white/10 flex items-center justify-center text-aeter-ink-soft hover:text-white transition-colors shadow-glass rounded-xl"
         title="Zoom Out"
       >
         <Minus className="w-3.5 h-3.5" />
       </button>
       <button
         onClick={() => map.setView(JAKARTA_CENTER, DEFAULT_ZOOM)}
-        className="w-8 h-8 bg-void-panel/90 hover:bg-void-surface border border-void-border hover:border-scada-cyan/50 rounded-lg flex items-center justify-center text-slate-300 hover:text-scada-cyan transition-colors shadow-lg"
-        title="Reset to Jakarta Center"
+        className="w-8 h-8 glass-card-dark hover:bg-white/10 flex items-center justify-center text-aeter-ink-soft hover:text-white transition-colors shadow-glass rounded-xl"
+        title="Reset View"
       >
         <Maximize2 className="w-3.5 h-3.5" />
       </button>
@@ -117,12 +117,11 @@ export default function MapContainer({
 }: MapContainerProps) {
   const [isClient, setIsClient] = useState(false);
   const [mapStyle, setMapStyle] = useState<keyof typeof MAP_STYLES>('dark');
-  const [activeFilter, setActiveFilter] = useState<'all'|'active'|'inactive'|'solar'|'grid'>('all');
   const [focusedSensorId, setFocusedSensorId] = useState<string | null>(null);
   const { selectedDistrict } = useDashboardStore();
 
   // Fetch sensors with polling every 5 seconds
-  const { data: sensors, error, isLoading, mutate } = useSWR<Sensor[]>(
+  const { data: sensors, error, mutate } = useSWR<Sensor[]>(
     '/api/v1/sensors',
     fetcher,
     { refreshInterval: 5000 }
@@ -138,30 +137,15 @@ export default function MapContainer({
 
   const displayedSensors = (filteredSensors || []).filter(s => {
     if (focusedSensorId) return s.sensorId === focusedSensorId;
-    switch (activeFilter) {
-      case 'active': return (s.status || '').toLowerCase() === 'active';
-      case 'inactive': return (s.status || '').toLowerCase() !== 'active';
-      case 'solar': return s.energySource === 'Solar';
-      case 'grid': return s.energySource === 'Grid';
-      case 'all':
-      default: return true;
-    }
+    return true;
   });
-
-  const stats = {
-    total: filteredSensors?.length || 0,
-    active: filteredSensors?.filter(s => (s.status || '').toLowerCase() === 'active').length || 0,
-    inactive: filteredSensors?.filter(s => (s.status || '').toLowerCase() !== 'active').length || 0,
-    solar: filteredSensors?.filter(s => s.energySource === 'Solar').length || 0,
-    grid: filteredSensors?.filter(s => s.energySource === 'Grid').length || 0,
-  };
 
   if (!isClient) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-void rounded-xl border border-void-border">
-        <div className="flex flex-col items-center gap-3 font-mono">
-          <div className="animate-spin w-8 h-8 border-2 border-scada-cyan border-t-transparent rounded-full"></div>
-          <span className="text-slate-400 text-xs tracking-wider uppercase">INITIALIZING CARTOGRAPHIC TELEMETRY...</span>
+      <div className="w-full h-full flex items-center justify-center glass rounded-2xl">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin w-8 h-8 border-2 border-white/20 border-t-emerald-400 rounded-full"></div>
+          <span className="text-aeter-ink-soft text-xs">Loading map vector layer...</span>
         </div>
       </div>
     );
@@ -169,15 +153,15 @@ export default function MapContainer({
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-void rounded-xl border border-void-border">
-        <div className="text-center font-mono">
-          <div className="text-scada-rose text-sm mb-2 uppercase">TELEMETRY LINK FAILURE</div>
+      <div className="w-full h-full flex items-center justify-center glass rounded-2xl">
+        <div className="text-center">
+          <div className="text-rose-400 text-sm mb-2 font-medium">Unable to load telemetry points</div>
           <button
             onClick={() => mutate()}
-            className="text-xs text-scada-cyan hover:underline flex items-center gap-1.5 mx-auto"
+            className="text-xs text-sky-400 hover:underline flex items-center gap-1.5 mx-auto"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            RE-ENGAGE FEED
+            Retry Feed
           </button>
         </div>
       </div>
@@ -185,12 +169,12 @@ export default function MapContainer({
   }
 
   return (
-    <div className="relative w-full h-full" style={{ height }}>
+    <div className="relative w-full h-full rounded-2xl overflow-hidden" style={{ height }}>
       <LeafletMap
         center={JAKARTA_CENTER}
         zoom={DEFAULT_ZOOM}
-        className="w-full h-full rounded-xl"
-        style={{ background: '#070A11' }}
+        className="w-full h-full rounded-2xl"
+        style={{ background: '#0f1117' }}
         zoomControl={false}
       >
         <TileLayer
@@ -215,98 +199,20 @@ export default function MapContainer({
 
       {/* Layer selector */}
       <div className="absolute top-3 left-3 z-[1000]">
-        <div className="bg-void-panel/90 backdrop-blur-md border border-void-border rounded-lg p-1 flex gap-1 shadow-xl">
+        <div className="glass-card-dark p-1 flex gap-1 shadow-glass rounded-xl">
           {(Object.keys(MAP_STYLES) as Array<keyof typeof MAP_STYLES>).map((style) => (
             <button
               key={style}
               onClick={() => setMapStyle(style)}
-              className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase tracking-wider transition-colors ${
+              className={`px-2.5 py-1 text-xs font-medium rounded-lg capitalize transition-colors ${
                 mapStyle === style
-                  ? 'bg-scada-cyan/20 border border-scada-cyan/40 text-scada-cyan'
-                  : 'text-slate-400 hover:text-white hover:bg-void-surface'
+                  ? 'bg-white/15 text-white shadow-sm'
+                  : 'text-aeter-ink-soft hover:text-white hover:bg-white/5'
               }`}
             >
-              {style === 'dark' ? 'CARTO DARK' : style === 'satellite' ? 'SAT' : 'LIGHT'}
+              {style}
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Telemetry feed status beacon */}
-      {isLoading && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-void-panel/90 backdrop-blur-md border border-scada-cyan/40 px-3 py-1 rounded-full flex items-center gap-2 shadow-lg">
-          <RefreshCw className="w-3 h-3 text-scada-cyan animate-spin" />
-          <span className="text-[10px] font-mono text-scada-cyan tracking-wider uppercase">SYNCING MUNICIPAL BUS...</span>
-        </div>
-      )}
-
-      {/* High-density Telemetry Node Bar at bottom */}
-      <div className="absolute bottom-3 left-3 right-3 z-[1000]">
-        <div className="bg-void-panel/95 backdrop-blur-md border border-void-border rounded-lg px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 shadow-2xl">
-          <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono">
-            <button
-              onClick={() => setActiveFilter('all')}
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
-                activeFilter === 'all' ? 'bg-void-surface border-scada-cyan/40 text-white' : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-              <span>NODES:</span>
-              <span className="text-white font-bold">{stats.total}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveFilter(prev => prev === 'active' ? 'all' : 'active')}
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
-                activeFilter === 'active' ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400' : 'border-transparent text-slate-400 hover:text-emerald-400'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>ACTIVE:</span>
-              <span className="text-emerald-400 font-bold">{stats.active}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveFilter(prev => prev === 'inactive' ? 'all' : 'inactive')}
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
-                activeFilter === 'inactive' ? 'bg-rose-500/15 border-rose-500/40 text-rose-400' : 'border-transparent text-slate-400 hover:text-rose-400'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-              <span>OFFLINE:</span>
-              <span className="text-rose-400 font-bold">{stats.inactive}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveFilter(prev => prev === 'solar' ? 'all' : 'solar')}
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
-                activeFilter === 'solar' ? 'bg-amber-500/15 border-amber-500/40 text-amber-400' : 'border-transparent text-slate-400 hover:text-amber-400'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              <span>SOLAR:</span>
-              <span className="text-amber-400 font-bold">{stats.solar}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveFilter(prev => prev === 'grid' ? 'all' : 'grid')}
-              className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
-                activeFilter === 'grid' ? 'bg-blue-500/15 border-blue-500/40 text-blue-400' : 'border-transparent text-slate-400 hover:text-blue-400'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-              <span>GRID:</span>
-              <span className="text-blue-400 font-bold">{stats.grid}</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => mutate()}
-            className="text-slate-400 hover:text-scada-cyan p-1 rounded transition-colors ml-auto"
-            title="Poll Now"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
         </div>
       </div>
 
