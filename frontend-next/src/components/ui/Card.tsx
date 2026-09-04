@@ -4,22 +4,23 @@ import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/src/lib/utils';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'glass' | 'solid';
+  variant?: 'default' | 'glass' | 'solid' | 'dark';
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', children, ...props }, ref) => {
     const variants = {
-      default: 'bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm',
-      glass: 'bg-white/5 border border-white/10 backdrop-blur-lg',
-      solid: 'bg-slate-800 border border-slate-700',
+      default: 'glass-card',
+      glass: 'glass',
+      solid: 'bg-[#181c26] border border-white/8',
+      dark: 'glass-card-dark',
     };
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-xl overflow-hidden',
+          'rounded-2xl overflow-hidden',
           variants[variant],
           className
         )}
@@ -37,7 +38,7 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('px-5 py-4 border-b border-slate-700/50', className)}
+      className={cn('px-5 py-4 border-b border-white/8', className)}
       {...props}
     />
   )
@@ -48,7 +49,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold text-white', className)}
+      className={cn('text-base font-semibold text-white tracking-tight', className)}
       {...props}
     />
   )
