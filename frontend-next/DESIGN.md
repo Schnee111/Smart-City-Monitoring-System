@@ -1,26 +1,41 @@
-# Visual & Architectural Specification: Smart City Energy Command Deck (SCADA)
+# Design System Specification — AETER Monitor Archetype & Clean Utilitarian Craft
+**Project**: Smart City Energy & Environmental Telemetry
+**Archetype**: `monitor.aeter.my.id` + `taste-minimalist` + `impeccable` + `frontend-ui-engineering`
+**Audience**: Municipal Energy Directors, Infrastructure Engineers, Citizens
 
-## 1. Objective & Design Philosophy
-Transform generic dark glassmorphism slop into a military/municipal SCADA Command Deck (Palantir Foundry / Cybernetic Smart City Command inspired).
+---
 
-## 2. Design Tokens & Palette
-- Background: Deep Void `#070A11`, Panel Surface `#0D1322`, Border Hairline `#1A253C`
-- Accents:
-  - Cyan Telemetry: `#06B6D4` / `#22D3EE` (Sensors & active streams)
-  - Solar Clean Energy: `#F59E0B` / `#FBBF24` (Amber glow)
-  - Grid Power: `#3B82F6` / `#60A5FA` (Electric cobalt)
-  - Emergency/Offline: `#F43F5E` (Rose alert)
-- Map Vector Layer:
-  - Dark Carto Vector Tiles (`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`) replacing default bright OpenStreetMap.
-  - Glowing radar pulse markers for IoT sensor nodes.
-- Architecture / Tech Hygiene:
-  - Eliminate visual dependency on Material UI (`@mui/material` & `@mui/x-date-pickers`) for date selection; replace with sleek native Tailwind/Radix date filter controls.
-  - Telemetry HUD with real-time ping indicator, district status grid, and animated SVG sparklines.
+## 1. Design Philosophy
+- **Authentic Materiality**: Premium frosted glass (`rgba(255, 255, 255, 0.72)` in light / `rgba(28, 29, 33, 0.85)` in dark card), multi-stop ambient lighting, subtle double-bezel hairline borders (`1px solid rgba(255, 255, 255, 0.85)`).
+- **Anti-Slop Zero Tolerance**:
+  - NO sci-fi / hacker gimmick badges (`CMD-01`, `GEO-02`, `v2.4-PRO`).
+  - NO fake latency / simulated airflow metrics.
+  - NO decorative blinking neon dots or animated radar pulse rings.
+  - NO generic dark slate templates.
+- **Quiet Confidence**: Macro-whitespace, high data density without visual friction, tactile interactive feedback.
 
-## 3. Scope of Changes
-- `src/app/globals.css`: SCADA grid overlay subtle background, cyber glass utilities, terminal scrollbar.
-- `src/components/layout/DashboardLayout.tsx` & `Sidebar.tsx`: Modern cyber command sidebar, telemetry ping ("SYSTEM NOMINAL", "CASSANDRA SYNCED").
-- `src/components/ui/StatsCards.tsx`: High-density metric telemetry cards with animated sparkline indicators.
-- `src/components/map/MapContainer.tsx`: Dark CartoDB basemap tiles, custom glowing radar pulsing CSS markers.
-- `src/components/ui/HistoricalEnergyChart.tsx`: Remove MUI dependency, implement custom clean dark date & range switcher with Recharts area chart with cyan-amber gradient fills.
-- `src/components/ui/SolarSavingsCard.tsx`: SCADA efficiency telemetry panel.
+## 2. Typography
+- **Display & Interface**: `Plus Jakarta Sans`, sans-serif. Tight tracking (`-0.02em` on titles), high legibility, humane geometry.
+- **Data, Telemetry & Timestamps**: `JetBrains Mono`, monospace. Strictly `tabular-nums` for continuous numeric scanning.
+
+## 3. Color Tokens
+- **Background Canvas**: Soft ambient warm-tinted light canvas or sleek obsidian glass substrate.
+- **Surfaces**:
+  - Glass Card: `rgba(255, 255, 255, 0.68)` (light) / `rgba(28, 29, 33, 0.85)` (dark)
+  - Hairline Border: `rgba(255, 255, 255, 0.85)` (light) / `rgba(255, 255, 255, 0.08)` (dark)
+  - Hairline Divider: `rgba(23, 24, 28, 0.08)` (light) / `rgba(255, 255, 255, 0.06)` (dark)
+- **Ink**:
+  - Primary: `#17181c` (light) / `#f4f4f5` (dark)
+  - Soft: `#4b4f58` (light) / `#a1a1aa` (dark)
+  - Mute: `#8a8e98` (light) / `#71717a` (dark)
+- **Status Indicators (Subtle, purposeful)**:
+  - OK / Active: `#00d68f` (Emerald Pip)
+  - Warning / Elevated: `#d99a2b`
+  - Critical / Alert: `#d4553f`
+  - Accent / Telemetry: `#0284c7` (Sky-600)
+
+## 4. Components Architecture
+1. **Header**: Minimalist Linear Breadcrumb Strip (`SMART CITY / Energy Telemetry · Municipal Grid · Bandarlampung`), live 1.0s status chip with genuine green pip, live clock.
+2. **Metrics & Gauges**: Arc gauges and progress tracks inspired by `monitor.aeter`, showing genuine aggregated energy consumption and solar yield.
+3. **Map Experience**: CartoDB Positron / Dark Vector tiles with crisp, clean vector pin markers without distracting pulse halos.
+4. **Data Visualizations**: Clean Recharts with single-stroke paths, soft gradients, and crisp tooltip popovers.
