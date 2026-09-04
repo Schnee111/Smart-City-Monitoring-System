@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/src/components/ui/Sidebar';
-import { Activity, Radio, Database, ShieldCheck, Cpu } from 'lucide-react';
 import useSWR from 'swr';
 import { fetcher } from '@/src/lib/fetcher';
 import { Sensor } from '@/src/types';
@@ -17,8 +16,27 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>('');
 
-  // Poll sensor nodes count for live SCADA telemetry header
+  // Clock in WIB / UTC
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Poll sensor nodes count for genuine telemetry
   const { data: sensors } = useSWR<Sensor[]>(
     '/api/v1/sensors',
     fetcher,
@@ -52,7 +70,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
   }, [mobileMenuOpen]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-void">
+    <div className="flex h-screen overflow-hidden bg-aeter-bg">
       {/* Sidebar - Desktop */}
       <Sidebar 
         isOpen={sidebarOpen} 
@@ -71,64 +89,57 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         />
       )}
 
-      {/* Main SCADA Command Canvas */}
+      {/* Main Glassmorphic Viewport */}
       <main className={`flex-1 flex flex-col h-screen overflow-hidden ${isMobile ? 'pt-14' : ''}`}>
-        {/* Top SCADA Telemetry Stream HUD */}
-        <div className="h-12 bg-void-panel/90 border-b border-void-border px-4 lg:px-6 flex items-center justify-between z-10 select-none">
-          {/* Breadcrumb / Title tag */}
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-void text-[10px] font-mono font-medium text-scada-cyan border border-scada-cyan/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-scada-cyan animate-pulse"></span>
-              SCADA COMMAND DECK
-            </span>
-            <span className="hidden sm:inline text-void-muted">/</span>
-            <span className="text-xs font-mono text-slate-300 tracking-wider truncate uppercase">{title}</span>
-          </div>
-
-          {/* Live Telemetry Health Matrix */}
-          <div className="flex items-center gap-2 sm:gap-4 text-[11px] font-mono">
-            {/* SCADA ENGINE Status */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-void/80 border border-void-border">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-scada-cyan opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-scada-cyan"></span>
-              </span>
-              <span className="text-slate-400 hidden md:inline">SCADA:</span>
-              <span className="text-scada-cyan font-semibold tracking-wide">ONLINE</span>
+        {/* Top Minimalist Linear Breadcrumb Strip (AETER Monitor Archetype) */}
+        <div className="px-4 lg:px-6 pt-3.5 pb-2">
+          <header className="breadcrumb-strip">
+            {/* Linear Breadcrumb */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold tracking-tight text-white">SMART CITY</span>
+              <span className="text-white/25">/</span>
+              <span className="text-aeter-ink font-medium">Energy Telemetry</span>
+              <span className="text-white/25 hidden sm:inline">·</span>
+              <span className="text-aeter-ink-soft hidden sm:inline">Municipal Grid</span>
+              <span className="text-white/25 hidden md:inline">·</span>
+              <span className="text-aeter-ink-soft hidden md:inline">Bandarlampung</span>
             </div>
 
-            {/* CASSANDRA Engine Status */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-void/80 border border-void-border">
-              <Database className="w-3 h-3 text-emerald-400" />
-              <span className="text-slate-400 hidden md:inline">CASSANDRA:</span>
-              <span className="text-emerald-400 font-semibold tracking-wide">HEALTHY</span>
-            </div>
-
-            {/* NODES SYNCED Count */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-void/80 border border-void-border">
-              <Cpu className="w-3 h-3 text-scada-amber" />
-              <span className="text-slate-400 hidden md:inline">TELEMETRY:</span>
-              <span className="text-white font-semibold tracking-wide">
-                {totalSensors > 0 ? `${activeSensors}/${totalSensors} NODES` : '32 NODES SYNCED'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Scrollable Main Deck Workspace */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar">
-          {/* Deck Section Header */}
-          <header className="mb-4 lg:mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2 border-b border-void-border pb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg lg:text-xl font-bold font-mono tracking-wide text-white">{title}</h1>
-                <span className="text-[10px] font-mono text-slate-500 px-1.5 py-0.5 rounded border border-void-border bg-void/60">LIVE</span>
+            {/* Live Indicator Chip & Clock */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="aeter-chip">
+                <span className="emerald-pip" />
+                <span className="font-medium text-white">Live 1.0s</span>
               </div>
-              {subtitle && (
-                <p className="text-slate-400 text-xs mt-1 font-mono tracking-normal">{subtitle}</p>
+
+              {totalSensors > 0 && (
+                <div className="hidden sm:inline-flex items-center gap-1.5 aeter-chip font-mono text-[11px] tabular-nums">
+                  <span className="text-aeter-ink-soft">Grid Nodes</span>
+                  <span className="font-semibold text-white">{activeSensors}/{totalSensors}</span>
+                </div>
+              )}
+
+              {currentTime && (
+                <div className="font-mono tabular-nums text-xs font-semibold text-aeter-ink-soft px-2 py-1 rounded-lg bg-black/20 border border-white/5">
+                  <span>{currentTime}</span>
+                  <span className="text-[10px] ml-1 text-aeter-ink-mute">WIB</span>
+                </div>
               )}
             </div>
           </header>
+        </div>
+
+        {/* Scrollable Main Deck Workspace */}
+        <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-6 pt-2 custom-scrollbar">
+          {/* Deck Section Header */}
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+            <div>
+              <h1 className="text-lg lg:text-xl font-bold tracking-tight text-white">{title}</h1>
+              {subtitle && (
+                <p className="text-aeter-ink-soft text-xs mt-0.5">{subtitle}</p>
+              )}
+            </div>
+          </div>
 
           {/* Children View Canvas */}
           {children}

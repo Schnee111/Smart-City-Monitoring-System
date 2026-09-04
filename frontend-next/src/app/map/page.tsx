@@ -9,10 +9,10 @@ import SensorDetailCompact from '@/src/components/ui/SensorDetailCompact';
 const MapContainer = dynamic(() => import('@/src/components/map/MapContainer'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-slate-900/50 rounded-xl">
-      <div className="flex flex-col items-center gap-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-emerald-500 border-t-transparent"></div>
-        <span className="text-slate-400 text-sm">Memuat peta...</span>
+    <div className="w-full h-full min-h-[500px] flex items-center justify-center glass rounded-2xl">
+      <div className="flex flex-col items-center gap-2.5">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-emerald-400"></div>
+        <span className="text-aeter-ink-soft text-xs">Loading map vector layer...</span>
       </div>
     </div>
   ),
@@ -21,13 +21,13 @@ const MapContainer = dynamic(() => import('@/src/components/map/MapContainer'), 
 export default function MapPage() {
   return (
     <DashboardLayout 
-      title="Peta Sensor" 
-      subtitle="Distribusi sensor energi di seluruh kota"
+      title="Geographic Telemetry Map" 
+      subtitle="Spatial distribution and load metrics of grid and solar sensors across municipal districts"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Map - Takes 3 columns */}
-        <div className="lg:col-span-3 h-[calc(100vh-200px)] min-h-[500px]">
-          <div className="h-full rounded-xl overflow-hidden border border-slate-700/50">
+        <div className="lg:col-span-3 h-[calc(100vh-190px)] min-h-[500px]">
+          <div className="h-full rounded-2xl overflow-hidden glass shadow-glass">
             <MapContainer />
           </div>
         </div>

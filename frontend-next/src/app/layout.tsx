@@ -1,13 +1,23 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { ToastProvider } from '@/src/components/ui/Toast';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'Smart City Energy Monitoring',
-  description: 'Real-time energy monitoring dashboard for smart city infrastructure - SDG 7 & SDG 11',
+  title: 'Smart City Energy Telemetry · Municipal Grid',
+  description: 'Real-time municipal energy telemetry and infrastructure monitoring',
 };
 
 export default function RootLayout({
@@ -16,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="dark">
+    <html lang="id" className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}>
       <head>
         <link
           rel="stylesheet"
@@ -25,7 +35,7 @@ export default function RootLayout({
           crossOrigin=""
         />
       </head>
-      <body className={inter.className}>
+      <body className="font-sans antialiased bg-aeter-bg text-aeter-ink">
         <ToastProvider>
           {children}
         </ToastProvider>

@@ -6,10 +6,10 @@ import SensorManagement from '@/src/components/sensors/SensorManagement';
 export default function SensorsPage() {
   return (
     <DashboardLayout 
-      title="Manajemen Sensor" 
-      subtitle="Kelola data sensor energi"
+      title="Sensor & Grid Nodes" 
+      subtitle="Manage hardware sensor nodes, district assignments, and telemetry endpoints"
     >
-      <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl">
+      <div className="glass rounded-2xl p-1 shadow-glass">
         <SensorManagement />
       </div>
     </DashboardLayout>
