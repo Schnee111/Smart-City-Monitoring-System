@@ -189,7 +189,7 @@ export function SensorFormModal({ isOpen, onClose, onSuccess, sensor }: SensorFo
             label="Latitude"
             type="text"
             value={formData.latitude}
-            onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, latitude: e.target.value })}
             placeholder="-6.1751"
             error={errors.latitude}
             icon={<MapPin className="w-4 h-4" />}
@@ -198,7 +198,7 @@ export function SensorFormModal({ isOpen, onClose, onSuccess, sensor }: SensorFo
             label="Longitude"
             type="text"
             value={formData.longitude}
-            onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, longitude: e.target.value })}
             placeholder="106.8650"
             error={errors.longitude}
           />

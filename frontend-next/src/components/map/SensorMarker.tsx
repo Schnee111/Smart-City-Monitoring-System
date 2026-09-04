@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Marker, Tooltip, CircleMarker, useMap } from 'react-leaflet';
+import { Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useDashboardStore } from '@/src/lib/store';
 import { Sensor } from '@/src/types';
@@ -15,57 +15,54 @@ function createSensorIcon(
   const isActive = status.toLowerCase() === 'active';
   const isMaintenance = status.toLowerCase() === 'maintenance';
 
-  // SCADA Palette
-  // Solar: Amber (#F59E0B), Grid: Electric Cobalt (#3B82F6)
-  const coreColor = isSolar ? '#F59E0B' : '#3B82F6';
+  // Clean Utilitarian Craft Palette
+  // Solar: Warm Amber (#d99a2b), Grid: Sky/Cobalt (#0284c7)
+  const coreColor = isSolar ? '#d99a2b' : '#0284c7';
   
-  // Status Colors: Active = Emerald, Maintenance = Amber, Offline/Inactive = Rose
-  const statusColor = isActive ? '#10B981' : isMaintenance ? '#F59E0B' : '#F43F5E';
-  const pulseClass = isActive ? 'scada-radar-pulse' : isMaintenance ? 'scada-radar-pulse-amber' : 'scada-radar-pulse-rose';
-  
-  const size = isSelected ? 16 : 12;
+  // Status indicator dot: Active = Emerald, Maintenance = Amber, Offline = Rose
+  const statusPip = isActive ? '#00d68f' : isMaintenance ? '#d99a2b' : '#d4553f';
+
+  const pinSize = isSelected ? 22 : 16;
+  const dotSize = isSelected ? 7 : 5;
 
   return L.divIcon({
-    className: 'custom-scada-marker-wrapper',
+    className: 'clean-aeter-sensor-pin',
     html: `
-      <div class="relative flex items-center justify-center" style="width: 32px; height: 32px;">
-        <!-- Glowing Radar Ring Pulse -->
-        <div class="${pulseClass} absolute" style="
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          background: ${statusColor};
-          opacity: 0.45;
-          pointer-events: none;
-        "></div>
-
-        <!-- Static Halo -->
-        <div class="absolute" style="
-          width: ${size + 8}px;
-          height: ${size + 8}px;
-          border-radius: 50%;
-          border: 1px solid ${statusColor};
-          opacity: 0.6;
-          pointer-events: none;
-        "></div>
-
-        <!-- Node Center Dot -->
+      <div class="aeter-sensor-pin relative flex items-center justify-center cursor-pointer" style="width: ${pinSize}px; height: ${pinSize}px;">
         <div style="
-          width: ${size}px;
-          height: ${size}px;
+          width: ${pinSize}px;
+          height: ${pinSize}px;
           border-radius: 50%;
-          background: ${coreColor};
-          border: 2px solid ${isSelected ? '#FFFFFF' : '#070A11'};
-          box-shadow: 0 0 10px ${coreColor}, 0 0 4px ${statusColor};
-          position: relative;
-          z-index: 2;
-          transition: transform 0.2s ease;
-          ${isSelected ? 'transform: scale(1.35);' : ''}
+          background: rgba(23, 26, 35, 0.90);
+          border: 1.5px solid ${isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.25)'};
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <div style="
+            width: ${dotSize}px;
+            height: ${dotSize}px;
+            border-radius: 50%;
+            background: ${coreColor};
+          "></div>
+        </div>
+
+        <!-- Status indicator mini-pip -->
+        <div style="
+          position: absolute;
+          top: -1px;
+          right: -1px;
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: ${statusPip};
+          border: 1px solid #0f1117;
         "></div>
       </div>
     `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    iconSize: [pinSize, pinSize],
+    iconAnchor: [pinSize / 2, pinSize / 2],
   });
 }
 
@@ -120,74 +117,51 @@ export default function SensorMarker({ sensor, onClick }: SensorMarkerProps) {
   if (!icon) return null;
 
   return (
-    <>
-      {isSelected && (
-        <CircleMarker
-          center={[sensor.latitude, sensor.longitude]}
-          radius={28}
-          pathOptions={{
-            color: isSolar ? '#F59E0B' : '#06B6D4',
-            fillColor: isSolar ? '#F59E0B' : '#06B6D4',
-            fillOpacity: 0.12,
-            weight: 1.5,
-            dashArray: '3, 3',
-            opacity: 0.8,
-          }}
-        />
-      )}
-
-      <Marker
-        ref={markerRef}
-        position={[sensor.latitude, sensor.longitude]}
-        icon={icon}
-        eventHandlers={{ click: handleClick }}
+    <Marker
+      ref={markerRef}
+      position={[sensor.latitude, sensor.longitude]}
+      icon={icon}
+      eventHandlers={{
+        click: handleClick,
+      }}
+    >
+      <Tooltip
+        direction="top"
+        offset={[0, -10]}
+        opacity={1}
+        className="sensor-tooltip-clean"
       >
-        <Tooltip direction="top" offset={[0, -14]} opacity={1}>
-          <div className="bg-void-panel/95 border border-void-border backdrop-blur-md rounded-lg px-3 py-2.5 shadow-2xl font-mono min-w-[150px]">
-            <div className="flex items-center justify-between gap-2 mb-1.5 pb-1 border-b border-void-border">
-              <div className="flex items-center gap-1.5">
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{
-                    backgroundColor: isSolar ? '#F59E0B' : '#3B82F6',
-                    boxShadow: `0 0 6px ${isSolar ? '#F59E0B' : '#3B82F6'}`
-                  }}
-                />
-                <span className="text-white text-xs font-semibold tracking-wide">
-                  {sensor.sensorId}
-                </span>
-              </div>
-              <span
-                className={`text-[9px] px-1.5 py-0.2 rounded uppercase font-semibold ${
-                  isActive
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                    : isMaintenance
-                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                    : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                }`}
-              >
-                {sensor.status}
-              </span>
-            </div>
-
-            <div className="text-[11px] text-slate-300">
-              <div className="text-slate-400 text-[10px]">{sensor.districtName}</div>
-              {sensor.latestReading ? (
-                <div className="mt-1 flex items-center justify-between gap-2 pt-1 border-t border-void-border/50">
-                  <span className="text-scada-cyan font-semibold">
-                    {sensor.latestReading.kwhUsage.toFixed(2)} kWh
-                  </span>
-                  <span className="text-slate-400">
-                    {sensor.latestReading.voltage.toFixed(1)} V
-                  </span>
-                </div>
-              ) : (
-                <div className="text-[10px] text-slate-500 mt-1">NO TELEMETRY STREAM</div>
-              )}
+        <div className="glass-card-dark px-3 py-2 text-xs shadow-2xl min-w-[140px] pointer-events-none">
+          <div className="flex items-center justify-between gap-2 mb-1 pb-1 border-b border-white/8">
+            <span className="font-semibold text-white font-mono text-[11px]">{sensor.sensorId}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{
+                background: isActive ? '#00d68f' : isMaintenance ? '#d99a2b' : '#d4553f'
+              }} />
+              <span className="text-[10px] text-aeter-ink-soft">{sensor.status}</span>
             </div>
           </div>
-        </Tooltip>
-      </Marker>
-    </>
+          
+          <div className="space-y-0.5 text-[11px]">
+            <div className="flex items-center justify-between text-aeter-ink-soft">
+              <span>District:</span>
+              <span className="text-white font-medium">{sensor.districtName}</span>
+            </div>
+            <div className="flex items-center justify-between text-aeter-ink-soft">
+              <span>Source:</span>
+              <span className={isSolar ? 'text-amber-400 font-medium' : 'text-sky-400 font-medium'}>
+                {sensor.energySource}
+              </span>
+            </div>
+            {sensor.latestReading && (
+              <div className="mt-1 flex items-center justify-between pt-1 border-t border-white/8 font-mono tabular-nums">
+                <span className="text-aeter-ink-mute text-[10.5px]">Load</span>
+                <span className="text-white font-semibold">{sensor.latestReading.kwhUsage} kWh</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </Tooltip>
+    </Marker>
   );
 }
