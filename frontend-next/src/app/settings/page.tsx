@@ -2,16 +2,13 @@
 
 import { useState } from 'react';
 import { 
-  Settings, 
   Server, 
   Map, 
   Bell, 
   Info, 
   ExternalLink,
   Check,
-  Database,
-  Globe,
-  RefreshCw
+  Globe
 } from 'lucide-react';
 import DashboardLayout from '@/src/components/layout/DashboardLayout';
 import { Select } from '@/src/components/ui/Select';
@@ -25,224 +22,144 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
-    // In a real app, this would save to localStorage or backend
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <DashboardLayout 
-      title="Pengaturan" 
-      subtitle="Konfigurasi aplikasi dan preferensi"
+      title="System Preferences" 
+      subtitle="Configure API endpoints, ingestion interval, and telemetry map styles"
     >
-      <div className="max-w-4xl space-y-6">
+      <div className="max-w-4xl space-y-5">
         {/* API Configuration */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Server className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Konfigurasi API</h3>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Server className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-white font-semibold text-sm">API & Ingestion Service</h3>
           </div>
           <div className="p-4 space-y-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Backend API URL</label>
+              <label className="block text-xs font-medium text-aeter-ink-soft mb-2">Backend Ingestion API URL</label>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={apiUrl}
                   onChange={(e) => setApiUrl(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white focus:outline-none focus:border-emerald-500/50"
+                  className="flex-1 px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-white/25"
                   placeholder="http://localhost:8080/api/v1"
                 />
-                <button className="px-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 hover:bg-slate-700 transition-colors">
-                  Test
+                <button className="px-3.5 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-medium text-white hover:bg-white/10 transition-colors">
+                  Test Connection
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mt-1">URL endpoint untuk koneksi ke backend Spring Boot</p>
+              <p className="text-[11px] text-aeter-ink-mute mt-1">Direct endpoint connecting to Spring Boot telemetry ingestion daemon</p>
             </div>
 
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Refresh Interval (ms)</label>
+              <label className="block text-xs font-medium text-aeter-ink-soft mb-2">Telemetry Refresh Interval</label>
               <Select
                 value={refreshInterval}
                 onChange={(e) => setRefreshInterval(e.target.value)}
                 options={[
-                  { value: '1000', label: '1 detik' },
-                  { value: '3000', label: '3 detik' },
-                  { value: '5000', label: '5 detik' },
-                  { value: '10000', label: '10 detik' },
-                  { value: '30000', label: '30 detik' }
+                  { value: '1000', label: '1.0s (High Precision)' },
+                  { value: '3000', label: '3.0s (Standard Telemetry)' },
+                  { value: '5000', label: '5.0s (Recommended)' },
+                  { value: '10000', label: '10.0s (Bandwidth Saver)' },
+                  { value: '30000', label: '30.0s' }
                 ]}
               />
-              <p className="text-xs text-slate-500 mt-1">Interval polling data real-time dari server</p>
+              <p className="text-[11px] text-aeter-ink-mute mt-1">Polling cadence for continuous SWR data revalidation</p>
             </div>
           </div>
         </div>
 
         {/* Map Settings */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Map className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Pengaturan Peta</h3>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Map className="w-4 h-4 text-sky-400" />
+            <h3 className="text-white font-semibold text-sm">Map Cartography & Vector Tiles</h3>
           </div>
           <div className="p-4 space-y-4">
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Style Peta Default</label>
+              <label className="block text-xs font-medium text-aeter-ink-soft mb-2">Default Vector Style</label>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { id: 'dark', label: 'Dark', icon: '🌙' },
-                  { id: 'satellite', label: 'Satellite', icon: '🛰️' },
-                  { id: 'street', label: 'Street', icon: '🗺️' },
+                  { id: 'dark', label: 'CartoDB Dark', icon: '🌙' },
+                  { id: 'satellite', label: 'ESRI Satellite', icon: '🛰️' },
+                  { id: 'light', label: 'CartoDB Positron', icon: '☀️' },
                 ].map((style) => (
                   <button
                     key={style.id}
                     onClick={() => setMapStyle(style.id)}
-                    className={`p-3 rounded-lg border transition-all ${
+                    className={`p-3 rounded-xl border transition-all text-left flex items-center gap-2.5 ${
                       mapStyle === style.id
-                        ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400'
-                        : 'bg-slate-800/50 border-slate-700/50 text-slate-400 hover:border-slate-600'
+                        ? 'border-white/30 bg-white/10 text-white shadow-sm'
+                        : 'border-white/5 bg-white/5 text-aeter-ink-soft hover:border-white/15'
                     }`}
                   >
-                    <span className="text-lg">{style.icon}</span>
-                    <p className="text-sm mt-1">{style.label}</p>
+                    <span>{style.icon}</span>
+                    <span className="text-xs font-medium">{style.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-slate-400" />
-                <div>
-                  <p className="text-white text-sm">Auto-center pada sensor aktif</p>
-                  <p className="text-xs text-slate-500">Peta otomatis fokus ke sensor yang dipilih</p>
-                </div>
+            <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/5">
+              <div>
+                <p className="text-xs font-semibold text-white">Default Telemetry Center</p>
+                <p className="text-[11px] text-aeter-ink-mute font-mono">Bandarlampung (-5.4500, 105.2667)</p>
               </div>
-              <button className="w-12 h-6 bg-emerald-500 rounded-full relative">
-                <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-              </button>
+              <Globe className="w-4 h-4 text-aeter-ink-soft" />
             </div>
           </div>
         </div>
 
-        {/* Notifications */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Bell className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Notifikasi</h3>
-          </div>
-          <div className="p-4 space-y-3">
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-              <div>
-                <p className="text-white text-sm">Peringatan konsumsi tinggi</p>
-                <p className="text-xs text-slate-500">Notifikasi saat sensor melebihi threshold</p>
-              </div>
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className={`w-12 h-6 rounded-full relative transition-colors ${
-                  showNotifications ? 'bg-emerald-500' : 'bg-slate-600'
-                }`}
-              >
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                  showNotifications ? 'right-1' : 'left-1'
-                }`}></span>
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-              <div>
-                <p className="text-white text-sm">Sensor offline alert</p>
-                <p className="text-xs text-slate-500">Notifikasi saat sensor tidak aktif</p>
-              </div>
-              <button className="w-12 h-6 bg-emerald-500 rounded-full relative">
-                <span className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* System Info */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Info className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Informasi Sistem</h3>
+        {/* System Information */}
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Info className="w-4 h-4 text-amber-400" />
+            <h3 className="text-white font-semibold text-sm">System & Stack Architecture</h3>
           </div>
           <div className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Aplikasi</p>
-                <p className="text-white font-medium mt-1">SCEM v1.0.0</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span className="text-[10px] text-aeter-ink-mute uppercase font-mono">Archetype</span>
+                <p className="text-white font-semibold mt-1">AETER Monitor</p>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Frontend</p>
-                <p className="text-white font-medium mt-1">Next.js 14</p>
+              <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span className="text-[10px] text-aeter-ink-mute uppercase font-mono">Frontend</span>
+                <p className="text-white font-semibold mt-1">Next.js 14</p>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Backend</p>
-                <p className="text-white font-medium mt-1">Spring Boot 3</p>
+              <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span className="text-[10px] text-aeter-ink-mute uppercase font-mono">Backend</span>
+                <p className="text-white font-semibold mt-1">Spring Boot 3</p>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Database</p>
-                <p className="text-white font-medium mt-1">Apache Cassandra</p>
-              </div>
-            </div>
-
-            <div className="mt-4 p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Database className="w-5 h-5 text-emerald-400 mt-0.5" />
-                <div>
-                  <p className="text-white font-medium">Smart City Energy Monitoring (SCEM)</p>
-                  <p className="text-slate-400 text-sm mt-1">
-                    Proyek mata kuliah NoSQL - Implementasi monitoring energi real-time 
-                    menggunakan Apache Cassandra untuk mendukung SDG 7 (Affordable & Clean Energy) 
-                    dan SDG 11 (Sustainable Cities).
-                  </p>
-                  <div className="flex items-center gap-4 mt-3">
-                    <a 
-                      href="https://cassandra.apache.org"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-400 text-sm hover:text-emerald-300 flex items-center gap-1"
-                    >
-                      Cassandra Docs <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <a 
-                      href="https://sdgs.un.org/goals"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-emerald-400 text-sm hover:text-emerald-300 flex items-center gap-1"
-                    >
-                      SDGs <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
+              <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span className="text-[10px] text-aeter-ink-mute uppercase font-mono">Telemetry DB</span>
+                <p className="text-white font-semibold mt-1">Apache Cassandra</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex items-center justify-end gap-3">
-          <button className="px-4 py-2.5 text-slate-400 hover:text-white transition-colors">
-            Reset ke Default
-          </button>
-          <button 
+        {/* Save Bar */}
+        <div className="flex justify-end pt-2">
+          <button
             onClick={handleSave}
-            className={`px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-all ${
-              saved 
-                ? 'bg-emerald-500 text-white' 
-                : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+            className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              saved
+                ? 'bg-emerald-500 text-white'
+                : 'bg-white/10 hover:bg-white/15 text-white border border-white/15'
             }`}
           >
             {saved ? (
               <>
-                <Check className="w-4 h-4" />
-                Tersimpan
+                <Check className="w-3.5 h-3.5" />
+                <span>Preferences Saved</span>
               </>
             ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Simpan Pengaturan
-              </>
+              <span>Save Changes</span>
             )}
           </button>
         </div>

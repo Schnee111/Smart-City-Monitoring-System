@@ -128,81 +128,81 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout 
-      title="Analitik" 
-      subtitle="Statistik dan analisis konsumsi energi"
+      title="Analytics & Grid Insights" 
+      subtitle="Comprehensive statistics, emissions offset, and district energy allocation"
     >
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-blue-400" />
+            <div className="w-9 h-9 rounded-xl bg-sky-500/15 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-sky-400" />
             </div>
-            <span className="flex items-center text-emerald-400 text-sm">
-              <ArrowUpRight className="w-4 h-4" /> 12%
+            <span className="flex items-center text-emerald-400 text-xs font-semibold">
+              <ArrowUpRight className="w-3.5 h-3.5" /> 12%
             </span>
           </div>
-          <p className="text-2xl font-bold text-white mt-3">
-            {totalConsumption.toFixed(1)} <span className="text-sm text-slate-400 font-normal">kWh</span>
+          <p className="text-2xl font-bold font-mono tabular-nums text-white mt-3">
+            {totalConsumption.toFixed(1)} <span className="text-xs text-aeter-ink-mute font-normal">kWh</span>
           </p>
-          <p className="text-slate-400 text-sm">Total Konsumsi</p>
+          <p className="text-aeter-ink-soft text-xs mt-0.5">Total Consumption</p>
         </div>
 
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
-              <Sun className="w-5 h-5 text-amber-400" />
+            <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center">
+              <Sun className="w-4 h-4 text-amber-400" />
             </div>
-            <span className="flex items-center text-emerald-400 text-sm">
-              <ArrowUpRight className="w-4 h-4" /> 5%
+            <span className="flex items-center text-emerald-400 text-xs font-semibold">
+              <ArrowUpRight className="w-3.5 h-3.5" /> 5%
             </span>
           </div>
-          <p className="text-2xl font-bold text-white mt-3">
-            {avgSolarPercentage.toFixed(1)} <span className="text-sm text-slate-400 font-normal">%</span>
+          <p className="text-2xl font-bold font-mono tabular-nums text-white mt-3">
+            {avgSolarPercentage.toFixed(1)} <span className="text-xs text-aeter-ink-mute font-normal">%</span>
           </p>
-          <p className="text-slate-400 text-sm">Rata-rata Solar</p>
+          <p className="text-aeter-ink-soft text-xs mt-0.5">Solar Share Ratio</p>
         </div>
 
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-purple-400" />
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+              <Building2 className="w-4 h-4 text-white" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-white mt-3">
-            {districtStats.length} <span className="text-sm text-slate-400 font-normal">distrik</span>
+          <p className="text-2xl font-bold font-mono tabular-nums text-white mt-3">
+            {districtStats.length} <span className="text-xs text-aeter-ink-mute font-normal">Districts</span>
           </p>
-          <p className="text-slate-400 text-sm">Area Terpantau</p>
+          <p className="text-aeter-ink-soft text-xs mt-0.5">Monitored Districts</p>
         </div>
 
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <div className="glass-card p-4">
           <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-white mt-3">
-            {totalSensors} <span className="text-sm text-slate-400 font-normal">sensor</span>
+          <p className="text-2xl font-bold font-mono tabular-nums text-white mt-3">
+            {totalSensors} <span className="text-xs text-aeter-ink-mute font-normal">Nodes</span>
           </p>
-          <p className="text-slate-400 text-sm">Total Sensor Aktif</p>
+          <p className="text-aeter-ink-soft text-xs mt-0.5">Active Sensors</p>
         </div>
       </div>
       
       <div className="gap-4 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* --- ENERGY COST REALTIME --- */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-green-300/15 flex items-center justify-center shrink-0">
-              <Banknote className="w-6 h-6 text-green-500" />
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+              <Banknote className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-slate-400 text-sm mb-1">Biaya Energi (GRID Listrik)</p>
-              <div className="text-2xl font-bold text-white">
-                <span className="text-sm text-slate-400 font-normal">Rp. </span>
+              <p className="text-aeter-ink-soft text-xs mb-0.5">Electricity Cost (Grid Ingest)</p>
+              <div className="text-2xl font-bold font-mono tabular-nums text-white">
+                <span className="text-xs text-aeter-ink-mute font-normal">Rp </span>
                 {costLoading ? (
-                  <span className="text-lg text-slate-500">Memuat...</span>
+                  <span className="text-sm text-aeter-ink-mute">Loading...</span>
                 ) : (costError || !costData || !costData.success) ? (
-                  <span className="text-lg text-slate-500">N/A</span>
+                  <span className="text-sm text-aeter-ink-mute">N/A</span>
                 ) : (
                   <span>
                     {Number(costData.data ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}
@@ -213,22 +213,22 @@ export default function AnalyticsPage() {
           </div>
 
           {/* --- EMISSIONS CARD --- */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-red-800/15 flex items-center justify-center shrink-0">
-              <CloudFog className="w-6 h-6 text-red-300" />
+          <div className="glass-card p-4 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-rose-500/15 flex items-center justify-center shrink-0">
+              <CloudFog className="w-5 h-5 text-rose-400" />
             </div>
             <div>
-              <p className="text-slate-400 text-sm mb-1">Emisi Karbon (C02)</p>
-              <div className="text-2xl font-bold text-white">
+              <p className="text-aeter-ink-soft text-xs mb-0.5">Carbon Footprint (CO2 Offset)</p>
+              <div className="text-2xl font-bold font-mono tabular-nums text-white">
                 {emissionsLoading ? (
-                  <span className="text-lg text-slate-500">Memuat...</span>
+                  <span className="text-sm text-aeter-ink-mute">Loading...</span>
                 ) : (emissionsError || !emissionsData || !emissionsData.success) ? (
-                  <span className="text-lg text-slate-500">N/A</span>
+                  <span className="text-sm text-aeter-ink-mute">N/A</span>
                 ) : (
                   <span>
                     {Number(emissionsData.data ?? 0).toLocaleString('id-ID', { maximumFractionDigits: 2 })}
                   </span>
-                )}<span className="text-sm text-slate-400 font-normal"> kg</span>
+                )}<span className="text-xs text-aeter-ink-mute font-normal"> kg</span>
               </div>
             </div>
           </div>
@@ -237,16 +237,16 @@ export default function AnalyticsPage() {
 
       {/* Main Charts Grid */}
       <div className="mb-6">
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-white/8">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-white font-semibold">Konsumsi Energi Real-time</h3>
+              <BarChart3 className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-white font-semibold text-xs tracking-tight">Real-time Energy Telemetry</h3>
             </div>
             
             {/* View Mode Toggle */}
             <div className="flex items-center gap-3">
-              <div className="flex bg-slate-800 rounded-lg p-1">
+              <div className="flex bg-white/5 border border-white/5 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('total')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
@@ -312,15 +312,15 @@ export default function AnalyticsPage() {
       {/* District Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* District Consumption Comparison */}
-        <div className="lg:col-span-2 bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Building2 className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Konsumsi per Distrik</h3>
+        <div className="lg:col-span-2 glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Building2 className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-white font-semibold text-xs tracking-tight">Consumption per District</h3>
           </div>
           <div className="p-4">
             {loading ? (
               <div className="flex items-center justify-center h-48">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-emerald-400"></div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -334,19 +334,19 @@ export default function AnalyticsPage() {
                         <span className="text-slate-300 flex items-center gap-2">
                           <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${
                             index === 0 ? 'bg-amber-500/20 text-amber-400' :
-                            index === 1 ? 'bg-slate-500/20 text-slate-300' :
+                            index === 1 ? 'bg-white/10 text-slate-300' :
                             index === 2 ? 'bg-orange-500/20 text-orange-400' :
-                            'bg-slate-700/50 text-slate-400'
+                            'bg-white/5 text-slate-400'
                           }`}>
                             {index + 1}
                           </span>
                           {district.districtName}
                         </span>
-                        <span className="text-white font-medium">
+                        <span className="text-white font-medium font-mono tabular-nums">
                           {district.totalConsumption.toFixed(1)} kWh
                         </span>
                       </div>
-                      <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
@@ -361,10 +361,10 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Energy Source Distribution - Pie Chart */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Zap className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-white font-semibold">Distribusi Energi</h3>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Zap className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-white font-semibold text-xs tracking-tight">Energy Source Share</h3>
           </div>
           <div className="p-4">
             <div className="flex flex-col items-center justify-center h-full min-h-[200px]">
@@ -376,7 +376,7 @@ export default function AnalyticsPage() {
                     cy="18"
                     r="15.915"
                     fill="transparent"
-                    stroke="#818cf8"
+                    stroke="rgba(255, 255, 255, 0.10)"
                     strokeWidth="3"
                     strokeDasharray="100 0"
                   />
@@ -387,7 +387,7 @@ export default function AnalyticsPage() {
                     cy="18"
                     r="15.915"
                     fill="transparent"
-                    stroke="#f59e0b" // amber-500
+                    stroke="#d99a2b"
                     strokeWidth="3"
                     strokeDasharray={`${avgSolarPercentage} ${100 - avgSolarPercentage}`}
                     strokeLinecap="round"
@@ -398,22 +398,22 @@ export default function AnalyticsPage() {
                 {/* Center Label */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl font-bold font-mono tabular-nums text-white">
                       {avgSolarPercentage.toFixed(0)}%
                     </p>
-                    <p className="text-xs text-slate-400">Solar</p>
+                    <p className="text-xs text-aeter-ink-mute">Solar</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                  <span className="text-xs text-slate-300">Solar</span>
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                  <span className="text-xs text-aeter-ink-soft">Solar</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
-                  <span className="text-xs text-indigo-400">Grid</span>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/40"></div>
+                  <span className="text-xs text-aeter-ink-soft">Grid</span>
                 </div>
               </div>
             </div>
@@ -423,46 +423,46 @@ export default function AnalyticsPage() {
 
       {/* Solar Percentage by District Table */}
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 p-4 border-b border-slate-700/50">
-            <Sun className="w-5 h-5 text-amber-400" />
-            <h3 className="text-white font-semibold">Persentase Energi Solar per Distrik</h3>
+        <div className="glass-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4 border-b border-white/8">
+            <Sun className="w-4 h-4 text-amber-400" />
+            <h3 className="text-white font-semibold text-xs tracking-tight">Solar Energy Ratio per District</h3>
           </div>
           <div className="p-4">
             {loading ? (
               <div className="flex items-center justify-center h-48">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-emerald-400"></div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-slate-700/50">
-                      <th className="text-left text-slate-400 text-sm font-medium py-3 px-2">Distrik</th>
-                      <th className="text-center text-slate-400 text-sm font-medium py-3 px-2">Sensor</th>
-                      <th className="text-center text-slate-400 text-sm font-medium py-3 px-2">Solar %</th>
-                      <th className="text-right text-slate-400 text-sm font-medium py-3 px-2">Konsumsi</th>
+                    <tr className="border-b border-white/8 text-aeter-ink-mute">
+                      <th className="text-left py-2.5 px-2 font-medium">District</th>
+                      <th className="text-center py-2.5 px-2 font-medium">Sensors</th>
+                      <th className="text-center py-2.5 px-2 font-medium">Solar Share</th>
+                      <th className="text-right py-2.5 px-2 font-medium">Load Ingestion</th>
                     </tr>
                   </thead>
                   <tbody>
                     {districtStats.map((district) => (
-                      <tr key={district.districtName} className="border-b border-slate-700/30 hover:bg-slate-800/30">
-                        <td className="py-3 px-2 text-white">{district.districtName}</td>
-                        <td className="py-3 px-2 text-center text-slate-300">{district.totalSensors}</td>
-                        <td className="py-3 px-2">
+                      <tr key={district.districtName} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-2.5 px-2 text-white font-medium">{district.districtName}</td>
+                        <td className="py-2.5 px-2 text-center text-aeter-ink-soft font-mono">{district.totalSensors}</td>
+                        <td className="py-2.5 px-2">
                           <div className="flex items-center justify-center gap-2">
-                            <div className="w-16 h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-amber-500 rounded-full"
+                                className="h-full bg-amber-400 rounded-full"
                                 style={{ width: `${district.solarPercentage}%` }}
                               />
                             </div>
-                            <span className="text-amber-400 text-sm w-12 text-right">
+                            <span className="text-amber-400 font-mono tabular-nums text-xs w-10 text-right">
                               {district.solarPercentage.toFixed(0)}%
                             </span>
                           </div>
                         </td>
-                        <td className="py-3 px-2 text-right text-emerald-400 font-medium">
+                        <td className="py-2.5 px-2 text-right text-emerald-400 font-mono tabular-nums font-semibold">
                           {district.totalConsumption.toFixed(1)} kWh
                         </td>
                       </tr>
